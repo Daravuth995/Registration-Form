@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Test Registration</title>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #f5f7ff;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --light-gray: #f0f0f0;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #757575;
+            --robot-blue: #00b4d8;
+            --robot-dark: #0077b6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.2);
+        }
+        
+        input[readonly] {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            cursor: not-allowed;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            background-color: #3a5bef;
+        }
+        
+        button:active {
+            transform: translateY(2px);
+        }
+        
+        button:disabled {
+            background-color: var(--medium-gray);
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            margin-top: 5px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        /* Loading animation for buttons */
+        .button-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 4px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: button-loading-spinner 1s ease infinite;
+        }
+        
+        @keyframes button-loading-spinner {
+            from {
+                transform: rotate(0turn);
+            }
+            to {
+                transform: rotate(1turn);
+            }
+        }
+        
+        /* Robotic verification popup */
+        .robot-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .robot-container {
+            background: linear-gradient(135deg, #0a192f, #172a45);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .robot-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--robot-blue);
+            padding-bottom: 15px;
+        }
+        
+        .robot-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            background-color: var(--robot-blue);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 180, 216, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 180, 216, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 180, 216, 0); }
+        }
+        
+        .robot-title {
+            font-size: 20px;
+            color: var(--robot-blue);
+        }
+        
+        .robot-status {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .robot-progress {
+            height: 5px;
+            background-color: rgba(0, 180, 216, 0.2);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .robot-progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--robot-blue);
+            transition: width 0.5s ease;
+        }
+        
+        .robot-steps {
+            margin-bottom: 20px;
+        }
+        
+        .robot-step {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        
+        .robot-step.active {
+            opacity: 1;
+        }
+        
+        .robot-step.completed {
+            opacity: 0.8;
+            color: #90e0ef;
+        }
+        
+        .robot-step-icon {
+            margin-right: 10px;
+            color: var(--robot-blue);
+        }
+        
+        .robot-step.completed .robot-step-icon {
+            color: #90e0ef;
+        }
+        
+        .robot-footer {
+            text-align: center;
+            font-size: 12px;
+            color: #90e0ef;
+            margin-top: 20px;
+        }
+        
+        /* Enhanced confirmation panel */
+        .confirmation-panel {
+            display: none;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.5s ease-out;
+            text-align: center;
+        }
+        
+        .confirmation-header {
+            margin-bottom: 30px;
+        }
+        
+        .confirmation-header h2 {
+            color: var(--success-color);
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .confirmation-header p {
+            color: var(--dark-gray);
+            font-size: 16px;
+        }
+        
+        .checkmark-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #e8f5e9;
+            margin: 0 auto 25px;
+            position: relative;
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        .checkmark {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            transform: rotate(45deg);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .checkmark-stem {
+            position: absolute;
+            width: 4px;
+            height: 25px;
+            background-color: var(--success-color);
+            left: 15px;
+            top: 5px;
+            animation: drawStem 0.5s ease-out;
+        }
+        
+        .checkmark-kick {
+            position: absolute;
+            width: 12px;
+            height: 4px;
+            background-color: var(--success-color);
+            left: 5px;
+            top: 22px;
+            animation: drawKick 0.5s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes drawStem {
+            0% { height: 0; top: 30px; }
+            100% { height: 25px; top: 5px; }
+        }
+        
+        @keyframes drawKick {
+            0% { width: 0; left: 15px; }
+            100% { width: 12px; left: 5px; }
+        }
+        
+        .confirmation-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .detail-group {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .detail-group:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .confirmation-actions {
+            text-align: center;
+        }
+        
+        .confirmation-actions button {
+            max-width: 250px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--primary-color), #6a5acd);
+            box-shadow: 0 4px 15px rgba(74, 107, 255, 0.3);
+        }
+        
+        .confirmation-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 107, 255, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+            }
+            
+            .form-container {
+                padding: 30px 20px;
+            }
+            
+            .confirmation-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .robot-container {
+                padding: 20px;
+            }
+            
+            .confirmation-panel {
+                padding: 30px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .checkmark-circle {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .checkmark {
+                width: 30px;
+                height: 30px;
+                top: 15px;
+                left: 15px;
+            }
+            
+            .checkmark-stem {
+                width: 3px;
+                height: 18px;
+                left: 12px;
+                top: 3px;
+            }
+            
+            .checkmark-kick {
+                width: 9px;
+                height: 3px;
+                left: 3px;
+                top: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container" id="registrationForm">
+            <h1>Test Registration</h1>
+            <form id="studentForm">
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" name="studentId" required>
+                    <div class="error-message" id="idError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentName">Student Name</label>
+                    <input type="text" id="studentName" name="studentName" readonly>
+                </div>
+                
+                <button type="button" id="verifyBtn" disabled>Verify Credentials</button>
+                <button type="button" id="registerBtn" disabled style="margin-top: 15px; display: none;">Register Now</button>
+            </form>
+        </div>
+        
+        <div class="confirmation-panel" id="confirmationPanel">
+            <div class="checkmark-circle">
+                <div class="checkmark">
+                    <div class="checkmark-stem"></div>
+                    <div class="checkmark-kick"></div>
+                </div>
+            </div>
+            <div class="confirmation-header">
+                <h2>Registration Successful!</h2>
+                <p>Your test registration has been confirmed.</p>
+            </div>
+            
+            <div class="confirmation-details">
+                <div>
+                    <div class="detail-group">
+                        <span class="detail-label">Student Name</span>
+                        <span class="detail-value" id="confName"></span>
+                    </div>
+                    <div class="detail-group">
+                        <span class="detail-label">Student ID</span>
+                        <span class="detail-value" id="confId"></span>
+                    </div>
+                    <div class="detail-group">
+                        <span class="detail-label">Classroom</span>
+                        <span class="detail-value" id="confClassroom"></span>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="detail-group">
+                        <span class="detail-label">Lecturer</span>
+                        <span class="detail-value" id="confLecturer"></span>
+                    </div>
+                    <div class="detail-group">
+                        <span class="detail-label">Seat Number</span>
+                        <span class="detail-value" id="confSeat"></span>
+                    </div>
+                    <div class="detail-group">
+                        <span class="detail-label">Test Date</span>
+                        <span class="detail-value" id="confTestDate"></span>
+                    </div>
+                    <div class="detail-group">
+                        <span class="detail-label">Duration</span>
+                        <span class="detail-value" id="confDuration"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="confirmation-actions">
+                <button type="button" id="newRegistrationBtn">New Registration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Robotic Verification Popup -->
+    <div class="robot-popup" id="robotPopup">
+        <div class="robot-container">
+            <div class="robot-header">
+                <div class="robot-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v4M8 4l-1 2M16 4l1 2M3 8v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8M3 8h18M3 8l1-4h16l1 4"/>
+                        <circle cx="9" cy="13" r="1"></circle>
+                        <circle cx="15" cy="13" r="1"></circle>
+                        <path d="M12 18v1"/>
+                    </svg>
+                </div>
+                <div class="robot-title">SYSTEM VERIFICATION</div>
+            </div>
+            
+            <div class="robot-status" id="robotStatus">Initializing verification protocol...</div>
+            
+            <div class="robot-progress">
+                <div class="robot-progress-bar" id="robotProgress"></div>
+            </div>
+            
+            <div class="robot-steps">
+                <div class="robot-step" id="step1">
+                    <span class="robot-step-icon">[1]</span>
+                    <span>Validating credentials</span>
+                </div>
+                <div class="robot-step" id="step2">
+                    <span class="robot-step-icon">[2]</span>
+                    <span>Checking student records</span>
+                </div>
+                <div class="robot-step" id="step3">
+                    <span class="robot-step-icon">[3]</span>
+                    <span>Verifying test eligibility</span>
+                </div>
+                <div class="robot-step" id="step4">
+                    <span class="robot-step-icon">[4]</span>
+                    <span>Processing registration</span>
+                </div>
+            </div>
+            
+            <div class="robot-footer">
+                SYSTEM ID: REGBOT-2024-07-10 | STATUS: <span id="robotStatusFooter">IN PROGRESS</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Replace with your Google Apps Script Web App URL
+        const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwRswuSz64y7oyojQx3g-n-vnFmNvMj9Zz-omsFo7diTAfVUvyMh38Sxqr67bZLKlz16Q/exec';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const studentIdInput = document.getElementById('studentId');
+            const passwordInput = document.getElementById('password');
+            const studentNameInput = document.getElementById('studentName');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const idError = document.getElementById('idError');
+            const passwordError = document.getElementById('passwordError');
+            
+            const registrationForm = document.getElementById('registrationForm');
+            const confirmationPanel = document.getElementById('confirmationPanel');
+            const robotPopup = document.getElementById('robotPopup');
+            
+            // Form inputs
+            const confName = document.getElementById('confName');
+            const confId = document.getElementById('confId');
+            const confClassroom = document.getElementById('confClassroom');
+            const confLecturer = document.getElementById('confLecturer');
+            const confSeat = document.getElementById('confSeat');
+            const confTestDate = document.getElementById('confTestDate');
+            const confDuration = document.getElementById('confDuration');
+            
+            const newRegistrationBtn = document.getElementById('newRegistrationBtn');
+            
+            // Robot verification elements
+            const robotStatus = document.getElementById('robotStatus');
+            const robotProgress = document.getElementById('robotProgress');
+            const robotStatusFooter = document.getElementById('robotStatusFooter');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const step4 = document.getElementById('step4');
+            
+            // Enable verify button when both fields have values
+            studentIdInput.addEventListener('input', toggleVerifyButton);
+            passwordInput.addEventListener('input', toggleVerifyButton);
+            
+            function toggleVerifyButton() {
+                verifyBtn.disabled = !(studentIdInput.value.trim() && passwordInput.value.trim());
+            }
+            
+            // Verify student credentials
+            verifyBtn.addEventListener('click', function() {
+                const studentId = studentIdInput.value.trim();
+                const password = passwordInput.value.trim();
+                
+                // Reset errors
+                idError.style.display = 'none';
+                passwordError.style.display = 'none';
+                
+                // Show loading state
+                verifyBtn.classList.add('button-loading');
+                verifyBtn.disabled = true;
+                
+                fetch(`${BACKEND_URL}?action=checkStudent&studentId=${studentId}&password=${password}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        verifyBtn.classList.remove('button-loading');
+                        
+                        if (data.success) {
+                            studentNameInput.value = data.student.name;
+                            verifyBtn.style.display = 'none';
+                            registerBtn.style.display = 'block';
+                            registerBtn.disabled = false;
+                        } else {
+                            showError(data.message);
+                            verifyBtn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        verifyBtn.classList.remove('button-loading');
+                        verifyBtn.disabled = false;
+                        showError('An error occurred. Please try again.');
+                        console.error('Error:', error);
+                    });
+            });
+            
+            // Register student for test
+            registerBtn.addEventListener('click', function() {
+                const studentId = studentIdInput.value.trim();
+                
+                // Show robotic verification popup
+                showRobotVerification();
+                
+                // Simulate progress (will be replaced by actual fetch progress)
+                simulateVerificationProgress();
+                
+                // Actual registration
+                fetch(`${BACKEND_URL}?action=registerTest&studentId=${studentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Complete all steps
+                            completeAllSteps();
+                            
+                            // Update status
+                            robotStatus.textContent = "Verification complete! Registration successful.";
+                            robotStatusFooter.textContent = "COMPLETED";
+                            
+                            // Close popup after delay and show confirmation
+                            setTimeout(() => {
+                                robotPopup.style.display = 'none';
+                                
+                                // Display confirmation with details
+                                confName.textContent = data.student.name;
+                                confId.textContent = studentIdInput.value;
+                                confClassroom.textContent = data.student.classroom;
+                                confLecturer.textContent = data.student.lecturer;
+                                confSeat.textContent = data.student.seatNumber;
+                                confTestDate.textContent = formatDate(data.test.testDate);
+                                confDuration.textContent = `${data.test.duration} minutes`;
+                                
+                                // Show confirmation panel
+                                registrationForm.style.display = 'none';
+                                confirmationPanel.style.display = 'block';
+                            }, 1500);
+                        } else {
+                            robotStatus.textContent = "Verification failed: " + data.message;
+                            robotStatusFooter.textContent = "FAILED";
+                            step4.classList.remove('active');
+                            step4.classList.add('error');
+                            setTimeout(() => {
+                                robotPopup.style.display = 'none';
+                                showError(data.message);
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        robotStatus.textContent = "System error during verification";
+                        robotStatusFooter.textContent = "ERROR";
+                        setTimeout(() => {
+                            robotPopup.style.display = 'none';
+                            showError('An error occurred during registration. Please try again.');
+                            console.error('Error:', error);
+                        }, 2000);
+                    });
+            });
+            
+            // New registration button
+            newRegistrationBtn.addEventListener('click', function() {
+                // Reset form
+                document.getElementById('studentForm').reset();
+                studentNameInput.value = '';
+                verifyBtn.style.display = 'block';
+                registerBtn.style.display = 'none';
+                
+                // Show form again
+                registrationForm.style.display = 'block';
+                confirmationPanel.style.display = 'none';
+                
+                // Focus on first input
+                studentIdInput.focus();
+            });
+            
+            function showError(message) {
+                // Simple error handling - could be enhanced
+                if (message.toLowerCase().includes('password')) {
+                    passwordError.textContent = message;
+                    passwordError.style.display = 'block';
+                } else {
+                    idError.textContent = message;
+                    idError.style.display = 'block';
+                }
+            }
+            
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                return new Date(dateString).toLocaleDateString('en-US', options);
+            }
+            
+            function showRobotVerification() {
+                // Reset robot verification UI
+                robotPopup.style.display = 'flex';
+                robotStatus.textContent = "Initializing verification protocol...";
+                robotProgress.style.width = '0%';
+                robotStatusFooter.textContent = "IN PROGRESS";
+                
+                // Reset steps
+                [step1, step2, step3, step4].forEach(step => {
+                    step.classList.remove('active', 'completed', 'error');
+                });
+            }
+            
+            function simulateVerificationProgress() {
+                // Step 1: Validating credentials
+                setTimeout(() => {
+                    robotStatus.textContent = "Validating credentials...";
+                    robotProgress.style.width = '25%';
+                    step1.classList.add('active');
+                }, 500);
+                
+                // Step 2: Checking student records
+                setTimeout(() => {
+                    robotStatus.textContent = "Checking student records...";
+                    robotProgress.style.width = '50%';
+                    step1.classList.remove('active');
+                    step1.classList.add('completed');
+                    step2.classList.add('active');
+                }, 1500);
+                
+                // Step 3: Verifying test eligibility
+                setTimeout(() => {
+                    robotStatus.textContent = "Verifying test eligibility...";
+                    robotProgress.style.width = '75%';
+                    step2.classList.remove('active');
+                    step2.classList.add('completed');
+                    step3.classList.add('active');
+                }, 2500);
+                
+                // Step 4: Processing registration
+                setTimeout(() => {
+                    robotStatus.textContent = "Processing registration...";
+                    robotProgress.style.width = '90%';
+                    step3.classList.remove('active');
+                    step3.classList.add('completed');
+                    step4.classList.add('active');
+                }, 3500);
+            }
+            
+            function completeAllSteps() {
+                robotProgress.style.width = '100%';
+                [step1, step2, step3, step4].forEach(step => {
+                    step.classList.remove('active');
+                    step.classList.add('completed');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
